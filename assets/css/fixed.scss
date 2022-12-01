@@ -1,0 +1,8 @@
+@mixin Fixed {
+    background-color: rgb(40, 42, 43, 0.3);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
