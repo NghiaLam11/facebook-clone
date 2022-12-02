@@ -115,7 +115,6 @@ export const fetchFirestore = async () => {
       isLoad.value = false;
     });
 };
-
 export const fetchStories = async () => {
   var isLoad = load();
   isLoad.value = true;
@@ -140,7 +139,6 @@ export const fetchStories = async () => {
     isLoad.value = false;
   });
 };
-
 export const addStory = async (story: any, fileArr: any) => {
   const storage = getStorage();
   const db = getFirestore();
@@ -156,7 +154,21 @@ export const addStory = async (story: any, fileArr: any) => {
   const data = await addDoc(colRef, { ...story, video: getImg });
   return data;
 };
-
+export const updateStory = async (updateStory: any, id: string) => {
+  const db = getFirestore();
+  const docRef = doc(db, "stories", id);
+  const data = await updateDoc(docRef, updateStory);
+};
+export const deleteStory = async (fileName: string, id: string) => {
+  const db = getFirestore();
+  const storage = getStorage();
+  const docRef = doc(db, "stories", id);
+  const desertRef = storageReference(storage, `public/${fileName}`);
+  const store = await deleteObject(desertRef);
+  const data = await deleteDoc(docRef);
+  fetchStories();
+  return data;
+};
 export const fetchStatus = async () => {
   var isLoad = load();
   isLoad.value = true;
@@ -166,28 +178,36 @@ export const fetchStatus = async () => {
   getDocs(colRef).then((res) => {
     const status: any = [];
     res.docs.forEach((story: any) => {
-      // console.log(story.data(), "story data");
-      // if (new Date().getTime() - story.data().countDownTime > 86400000) {
-      //   console.log("Hon roi", story.data());
-      //   deleteStory(story.data().fileName, story.id);
-      // }
       status.push({
         ...story.data(),
         id: story.id,
       });
     });
-    statusArr.value = status;
-    // console.log(stories);
+    statusArr.value = status.sort(function (a: any, b: any) {
+      return Number(new Date(b.uploadTime)) - Number(new Date(a.uploadTime));
+    });
     isLoad.value = false;
   });
 };
-
 export const addStatus = async (status: any, fileArr: any) => {
   const storage = getStorage();
   const db = getFirestore();
   const colRef = collection(db, "status");
-
-  if (fileArr.fileName !== "") {
+  let hashMap = new Map();
+  statusStore().value.forEach((status: any) => {
+    hashMap.set(status.fileName, status);
+  });
+  //if found the same file name img in store when u add status. It will change your time upload img
+  if (fileArr.fileName !== "" && hashMap.get(fileArr.fileName)) {
+    const updateValue = {
+      uploadTime:
+        new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(),
+    };
+    const data = await updateStatus(
+      updateValue,
+      hashMap.get(fileArr.fileName).id
+    );
+  } else if (fileArr.fileName !== "") {
     const imagesRef = storageReference(storage, fileArr.fileName);
     const storageRef: any = storageReference(
       storage,
@@ -205,24 +225,21 @@ export const addStatus = async (status: any, fileArr: any) => {
     return data;
   }
 };
-
-export const updateStory = async (updateStory: any, id: string) => {
+export const updateStatus = async (updateStatus: any, id: string) => {
   const db = getFirestore();
-  const docRef = doc(db, "stories", id);
-  const data = await updateDoc(docRef, updateStory);
+  const docRef = doc(db, "status", id);
+  const data = await updateDoc(docRef, updateStatus);
 };
-
-export const deleteStory = async (fileName: string, id: string) => {
+export const deleteStatus = async (fileName: string, id: string) => {
   const db = getFirestore();
   const storage = getStorage();
-  const docRef = doc(db, "stories", id);
-  const desertRef = storageReference(storage, `public/${fileName}`);
+  const docRef = doc(db, "status", id);
+  const desertRef = storageReference(storage, `status/${fileName}`);
   const store = await deleteObject(desertRef);
   const data = await deleteDoc(docRef);
-  fetchStories();
+  fetchStatus();
   return data;
 };
-
 export const saveFile = async () => {
   const storage = getStorage();
   const imagesRef = storageReference(

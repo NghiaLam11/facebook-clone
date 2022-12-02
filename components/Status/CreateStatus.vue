@@ -35,6 +35,14 @@
             class="inputfile"
           />
           <label for="file"><i class="fas fa-images"></i></label>
+          <img
+            :class="[
+              srcImgReader !== '' ? 'img__reader--display' : '',
+              'img__reader--hide',
+            ]"
+            :src="srcImgReader"
+            alt=""
+          />
         </div>
         <div class="field">
           <button class="btn__submit">Upload</button>
@@ -54,6 +62,7 @@ export default defineComponent({
   setup(prop, { emit }) {
     const text = ref("");
     const isPublic = ref(false);
+    const srcImgReader = ref<any>("");
     const onSelect = (e: any) => {
       if (e.target.value === "private") {
         isPublic.value = false;
@@ -67,8 +76,15 @@ export default defineComponent({
     const fileName = ref("");
     const file = ref(null);
     const onCreateFile = (e: any) => {
+      const reader = new FileReader();
       fileName.value = e.target.files[0].name;
       file.value = e.target.files[0];
+      reader.readAsDataURL(e.target.files[0]);
+      reader.addEventListener("load", (event) => {
+        if (event.target?.result) {
+          srcImgReader.value = event.target.result;
+        }
+      });
     };
     const onSubmit = async () => {
       const status = ref({
@@ -79,7 +95,10 @@ export default defineComponent({
         countHaha: 0,
         countSurprise: 0,
         content: text.value,
-        uploadTime: new Date().toLocaleDateString(),
+        uploadTime:
+          new Date().toLocaleDateString() +
+          "," +
+          new Date().toLocaleTimeString(),
         isPublic: isPublic.value,
         fileName: fileName.value,
         auth: prop.authContent,
@@ -89,7 +108,7 @@ export default defineComponent({
         file,
       });
       emit("hiddenStatus");
-      const data = await addStatus(status.value, fileArr.value)
+      const data = await addStatus(status.value, fileArr.value);
     };
     return {
       text,
@@ -98,6 +117,7 @@ export default defineComponent({
       onHidden,
       onSubmit,
       onCreateFile,
+      srcImgReader,
     };
   },
 });
@@ -122,6 +142,7 @@ export default defineComponent({
     background-color: $bg-color;
     padding: 20px;
     border-radius: 10px;
+    position: relative;
     .field {
       display: flex;
       flex-direction: column;
@@ -135,6 +156,32 @@ export default defineComponent({
         border: none;
         outline: none;
         box-shadow: 0 0 2px 0 black;
+      }
+      .img__reader--hide {
+        background-color: $bg-color;
+        padding: 10px;
+        width: 30%;
+        height: 30%;
+        object-fit: cover;
+        position: absolute;
+        top: 0%;
+        right: -30%;
+        border-radius: 10px;
+        transition: right 0.2s linear;
+        opacity: 0;
+      }
+      .img__reader--display {
+        background-color: $bg-color;
+        padding: 10px;
+        width: 30%;
+        height: 30%;
+        object-fit: cover;
+        position: absolute;
+        top: 0%;
+        right: -31%;
+        transition: right 0.2s linear;
+        border-radius: 10px;
+        opacity: 1;
       }
       .btn__submit {
         padding: 5px;

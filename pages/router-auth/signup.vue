@@ -57,6 +57,8 @@ const onSignUp = async () => {
     avatar:
       "https://firebasestorage.googleapis.com/v0/b/facebook-clone-11056.appspot.com/o/profile-user.png?alt=media&token=18e5d821-bbbd-47a7-8a84-1418b4b06ad8",
     bio: "Set bio",
+    friends: [],
+    friendRequests: [],
   });
   const signUp = await createUser(user.value);
 };
