@@ -28,7 +28,35 @@
         <img class="status__img" :src="item.attach" alt="" />
       </div>
       <div class="status__emotional">
-        <div class="status__emotional--child">
+        <div
+          v-if="idItem === item.id"
+          @mouseleave="onDisplayEmotionalOut"
+          class="status__emotional--hide"
+        >
+          <div class="status__emotional--hide--child">
+            <i @click="onLike(item)" class="like fas fa-thumbs-up"></i>
+          </div>
+          <div class="status__emotional--hide--child">
+            <i @click="onLove(item)" class="love fas fa-heart"></i>
+          </div>
+          <div class="status__emotional--hide--child">
+            <i @click="onHaha(item)" class="haha fas fa-grin-squint"></i>
+          </div>
+          <div class="status__emotional--hide--child">
+            <i @click="onSad(item)" class="sad fas fa-sad-tear"></i>
+          </div>
+          <div class="status__emotional--hide--child">
+            <i @click="onSurprise(item)" class="surprise fas fa-surprise"></i>
+          </div>
+          <div class="status__emotional--hide--child">
+            <i @click="onAngry(item)" class="angry fas fa-angry"></i>
+          </div>
+        </div>
+        <div
+          v-else
+          class="status__emotional--child"
+          @mouseover="onDisplayEmotional(item)"
+        >
           <span>{{ item.countLike }}</span>
           <i
             @click="onLike(item)"
@@ -68,7 +96,13 @@ export default defineComponent({
     const onUserStatus = () => {
       isUserStatus.value = true;
     };
-    console.log(new Date());
+    const idItem = ref("");
+    const onDisplayEmotional = (item: any) => {
+      idItem.value = item.id;
+    };
+    const onDisplayEmotionalOut = () => {
+      idItem.value = "";
+    };
     const isLike = ref(false);
     const onLike = async (item: any) => {
       if (isLike.value === true) {
@@ -85,6 +119,71 @@ export default defineComponent({
         isLike.value = true;
       }
     };
+    const onLove = async (item: any) => {
+      try {
+        if (item?.id) {
+          const updateValue = ref({
+            countLove: ++item.countLove,
+          });
+
+          const data = await updateStory(updateValue.value, item.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const onHaha = async (item: any) => {
+      try {
+        if (item?.id) {
+          const updateValue = ref({
+            countHaha: ++item.countHaha,
+          });
+
+          const data = await updateStory(updateValue.value, item.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const onSad = async (item: any) => {
+      try {
+        if (item?.id) {
+          const updateValue = ref({
+            countSad: ++item.countSad,
+          });
+
+          const data = await updateStory(updateValue.value, item.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const onSurprise = async (item: any) => {
+      try {
+        if (item?.id) {
+          const updateValue = ref({
+            countSurprise: ++item.countSurprise,
+          });
+
+          const data = await updateStory(updateValue.value, item.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    const onAngry = async (item: any) => {
+      try {
+        if (item?.id) {
+          const updateValue = ref({
+            countAngry: ++item.countAngry,
+          });
+
+          const data = await updateStory(updateValue.value, item.id);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
     return {
       status,
       onUserStatus,
@@ -92,6 +191,14 @@ export default defineComponent({
       onLike,
       isLike,
       idAuth,
+      onLove,
+      onHaha,
+      onSad,
+      onSurprise,
+      onAngry,
+      onDisplayEmotional,
+      onDisplayEmotionalOut,
+      idItem,
     };
   },
 });
@@ -114,7 +221,9 @@ export default defineComponent({
     width: 40px;
     height: 40px;
     border-radius: 50%;
+    margin-right: 5px;
   }
+
   .status__more {
     position: absolute;
     right: 1%;
@@ -145,6 +254,39 @@ export default defineComponent({
   border-top: 1px solid #000;
   display: flex;
   justify-content: space-around;
+  .status__emotional--hide {
+    display: flex;
+    flex: 100%;
+    .status__emotional--hide--child {
+      i {
+        transition: all 0.1s linear;
+        font-size: 2rem;
+        margin: 3px;
+      }
+      .like {
+        color: blue;
+      }
+      .love {
+        color: red;
+      }
+      .haha {
+        color: yellow;
+      }
+      .sad {
+        color: rgb(253, 253, 95);
+      }
+      .surprise {
+        color: rgb(248, 212, 9);
+      }
+      .angry {
+        color: red;
+      }
+      i:hover {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+    }
+  }
   .status__emotional--child {
     flex: 100%;
     padding: 15px 20px;
