@@ -27,7 +27,8 @@
       <div v-if="item.attach !== ''" class="img">
         <img class="status__img" :src="item.attach" alt="" />
       </div>
-      <div class="status__emotional">
+
+      <div @mouseleave="onDisplayEmotionalOut" class="status__emotional">
         <div
           v-if="idItem === item.id"
           @mouseleave="onDisplayEmotionalOut"
@@ -53,16 +54,12 @@
           </div>
         </div>
         <div
-          v-else
-          class="status__emotional--child"
+          class="status__emotional--child status__emotional--child1"
           @mouseover="onDisplayEmotional(item)"
+          @click="onLike(item)"
         >
-          <span>{{ item.countLike }}</span>
-          <i
-            @click="onLike(item)"
-            class="emotional fas fa-thumbs-up"
-            :class="{ liked: isLike }"
-          ></i>
+          <span class="emotional__count">{{ item.countLike }}</span>
+          <i class="emotional fas fa-thumbs-up" :class="{ liked: isLike }"></i>
         </div>
         <div class="status__emotional--child">
           <i class="emotional fas fa-comment-dots"></i>
@@ -118,7 +115,9 @@ export default defineComponent({
         const data = await updateStatus(updateValue.value, item.id);
         isLike.value = true;
       }
+      idItem.value = "";
     };
+    // Like cai la no like het 1 dong el
     const onLove = async (item: any) => {
       try {
         if (item?.id) {
@@ -131,6 +130,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
       }
+      idItem.value = "";
     };
     const onHaha = async (item: any) => {
       try {
@@ -144,6 +144,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
       }
+      idItem.value = "";
     };
     const onSad = async (item: any) => {
       try {
@@ -157,6 +158,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
       }
+      idItem.value = "";
     };
     const onSurprise = async (item: any) => {
       try {
@@ -170,6 +172,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
       }
+      idItem.value = "";
     };
     const onAngry = async (item: any) => {
       try {
@@ -183,6 +186,7 @@ export default defineComponent({
       } catch (error) {
         console.log(error);
       }
+      idItem.value = "";
     };
     return {
       status,
@@ -254,14 +258,48 @@ export default defineComponent({
   border-top: 1px solid #000;
   display: flex;
   justify-content: space-around;
+  position: relative;
+  // overflow: hidden;
   .status__emotional--hide {
     display: flex;
+    position: absolute;
     flex: 100%;
+    left: 1%;
+    top: -90%;
+    animation: emotional 1s ease-in-out;
+    @keyframes emotional {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
     .status__emotional--hide--child {
       i {
         transition: all 0.1s linear;
         font-size: 2rem;
         margin: 3px;
+        cursor: pointer;
+        background-color: #000;
+        border-radius: 50%;
+        padding: 5px;
+        overflow: hidden;
+        animation: shadowEmotional 5s ease-in-out infinite;
+      }
+      @keyframes shadowEmotional {
+        0% {
+          box-shadow: 0 0 10px rgb(229, 255, 0);
+        }
+        30% {
+          box-shadow: 0 0 7px #2e00fc;
+        }
+        70% {
+          box-shadow: 0 0 5px rgb(255, 240, 23);
+        }
+        100% {
+          box-shadow: 0 0 3px rgba(236, 18, 18, 0.5);
+        }
       }
       .like {
         color: blue;
@@ -273,7 +311,7 @@ export default defineComponent({
         color: yellow;
       }
       .sad {
-        color: rgb(253, 253, 95);
+        color: rgb(255, 255, 78);
       }
       .surprise {
         color: rgb(248, 212, 9);
@@ -282,7 +320,7 @@ export default defineComponent({
         color: red;
       }
       i:hover {
-        transform: scale(1.1);
+        transform: scale(1.3);
         opacity: 1;
       }
     }
@@ -291,19 +329,23 @@ export default defineComponent({
     flex: 100%;
     padding: 15px 20px;
     text-align: center;
+    cursor: pointer;
+    transition: all 0.13s linear;
     .emotional {
       font-size: 1.5rem;
       transition: all 0.1s linear;
       color: rgb(0, 0, 0, 0.5);
-      cursor: pointer;
+      padding-left: 2px;
+    }
+    .liked {
+      color: blue;
     }
   }
-
-  .status__emotional--child:hover {
-    background-color: rgb(209, 207, 207);
+  .status__emotional--child:hover .emotional{
+    transform: scale(1.1);
   }
-  .liked {
-    color: blue;
+  .status__emotional--child:hover {
+    background-color: rgb(219, 217, 217);
   }
 }
 </style>
