@@ -163,7 +163,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../assets/css/fixed.scss";
-
+@import "../assets/css/emotional-color.scss";
 .story__watch {
   @include Fixed;
   z-index: 999;
@@ -198,7 +198,7 @@ export default defineComponent({
         color: red;
         cursor: pointer;
       }
-      .story__remove:hover{
+      .story__remove:hover {
         font-size: 1.25rem;
       }
       .story__img {
@@ -230,24 +230,6 @@ export default defineComponent({
         }
         i:first-child {
           margin-left: 20px;
-        }
-        .like {
-          color: blue;
-        }
-        .love {
-          color: red;
-        }
-        .haha {
-          color: yellow;
-        }
-        .sad {
-          color: rgb(253, 253, 95);
-        }
-        .surprise {
-          color: rgb(248, 212, 9);
-        }
-        .angry {
-          color: red;
         }
         i:hover {
           transform: scale(1.1);
