@@ -102,6 +102,7 @@ export default defineComponent({
         isPublic: isPublic.value,
         fileName: fileName.value,
         auth: prop.authContent,
+        userReact: [],
       });
       const fileArr = ref({
         fileName,

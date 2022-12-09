@@ -38,12 +38,15 @@
             item.countAngry +
             item.countSurprise
           }}</span>
-          <i v-show="(item.countLike > 0)" class="like fas fa-thumbs-up"></i>
-          <i v-show="(item.countLove > 0)" class="love fas fa-heart"></i>
-          <i v-show="(item.countHaha > 0)" class="haha fas fa-grin-squint"></i>
-          <i v-show="(item.countSad > 0)" class="sad fas fa-sad-tear"></i>
-          <i v-show="(item.countSurprise > 0)" class="surprise fas fa-surprise"></i>
-          <i v-show="(item.countAngry > 0)" class="angry fas fa-angry"></i>
+          <i v-show="item.countLike > 0" class="like fas fa-thumbs-up"></i>
+          <i v-show="item.countLove > 0" class="love fas fa-heart"></i>
+          <i v-show="item.countHaha > 0" class="haha fas fa-grin-squint"></i>
+          <i v-show="item.countSad > 0" class="sad fas fa-sad-tear"></i>
+          <i
+            v-show="item.countSurprise > 0"
+            class="surprise fas fa-surprise"
+          ></i>
+          <i v-show="item.countAngry > 0" class="angry fas fa-angry"></i>
         </div>
         <!-- Emotional display focus -->
         <div
@@ -71,12 +74,63 @@
           </div>
         </div>
         <!-- Button Like -->
+
         <div
-          class="status__emotional--child status__emotional--child1"
+          v-for="e in item.userReact"
+          :key="e.idAuth"
+          class="status__emotional--display--child"
+          v-show="idAuth === e?.idAuth && e?.nameEmotional !== 'like'"
+        >
+          <div
+            @click="onLove(item)"
+            @mouseover="onDisplayEmotional(item)"
+            class="status__emotional--child"
+            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'love'"
+          >
+            <i class="love emotional fas fa-heart"></i>
+          </div>
+          <div
+            @click="onHaha(item)"
+            @mouseover="onDisplayEmotional(item)"
+            class="status__emotional--child"
+            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'haha'"
+          >
+            <i class="haha emotional fas fa-grin-squint"></i>
+          </div>
+          <div
+            @click="onSad(item)"
+            @mouseover="onDisplayEmotional(item)"
+            class="status__emotional--child"
+            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'sad'"
+          >
+            <i class="sad emotional fas fa-sad-tear"></i>
+          </div>
+          <div
+            @click="onSurprise(item)"
+            @mouseover="onDisplayEmotional(item)"
+            class="status__emotional--child"
+            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'surprise'"
+          >
+            <i class="surprise emotional fas fa-surprise"></i>
+          </div>
+          <div
+            @click="onAngry(item)"
+            @mouseover="onDisplayEmotional(item)"
+            class="status__emotional--child"
+            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'angry'"
+          >
+            <i class="angry emotional fas fa-angry"></i>
+          </div>
+        </div>
+        <div
+          class="status__emotional--child"
           @mouseover="onDisplayEmotional(item)"
           @click="onLike(item)"
         >
-          <i class="emotional fas fa-thumbs-up"></i>
+          <i
+            :class="{ 'status__emotional--liked': item.userReact.length !== 0 }"
+            class="like emotional fas fa-thumbs-up"
+          ></i>
         </div>
         <div class="status__emotional--child">
           <i class="emotional fas fa-comment-dots"></i>
@@ -91,7 +145,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-
+// Fix emotional////////////////////////////////
 export default defineComponent({
   setup() {
     // CALL fROM THE COMPOSABLES/USEFIREBASE FOLDER
@@ -100,7 +154,6 @@ export default defineComponent({
     const idAuth = computed(() => {
       return idUser().value;
     });
-
     // (2) GET ALL STATUS IN STORE
     const status = computed(() => {
       return statusStore().value.sort(function (a: any, b: any) {
@@ -115,6 +168,10 @@ export default defineComponent({
       isUserStatus.value = true;
     };
 
+    const auth = computed(() => {
+      return user().value;
+    });
+
     // DISPLAY EMOTIONAL WHEN YOU FOCUS LIKE BUTTON
     const idItem = ref("");
     const onDisplayEmotional = (item: any) => {
@@ -123,19 +180,30 @@ export default defineComponent({
     const onDisplayEmotionalOut = () => {
       idItem.value = "";
     };
-
     // HANDLE LIKE BUTTON EMOTIONAL
     const isReact = ref(false);
     const onLike = async (item: any) => {
-      if (isReact.value === true) {
+      item.userReact.forEach((element: any) => {
+        element.idAuth === idAuth.value
+          ? (isReact.value = true)
+          : (isReact.value = false);
+      });
+      if (item.userReact && isReact.value === true) {
+        const index = item.userReact.indexOf(idAuth);
+        item.userReact.splice(index, 1);
         const updateValue = ref({
           countLike: --item.countLike,
+          userReact: item.userReact,
+          isReact: item.isReact,
         });
         const data = await updateStatus(updateValue.value, item.id);
         isReact.value = false;
       } else {
+        item.userReact.push({ idAuth: idAuth.value, nameEmotional: "like" });
         const updateValue = ref({
           countLike: ++item.countLike,
+          userReact: item.userReact,
+          isReact: !isReact.value,
         });
         const data = await updateStatus(updateValue.value, item.id);
         isReact.value = true;
@@ -145,14 +213,20 @@ export default defineComponent({
     // HANDLE LOVE BUTTON EMOTIONAL
     const onLove = async (item: any) => {
       try {
-        if (isReact.value === true) {
+        if (isReact.value === true && item.userReact) {
+          const index = item.userReact.indexOf(idAuth);
+          item.userReact.splice(index, 1);
           const updateValue = ref({
+            userReact: item.userReact,
             countLove: --item.countLove,
           });
           const data = await updateStatus(updateValue.value, item.id);
           isReact.value = false;
         } else {
+          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "love" });
+
           const updateValue = ref({
+            userReact: item.userReact,
             countLove: ++item.countLove,
           });
           const data = await updateStatus(updateValue.value, item.id);
@@ -166,15 +240,20 @@ export default defineComponent({
     // HANDLE HAHA BUTTON EMOTIONAL
     const onHaha = async (item: any) => {
       try {
-        if (isReact.value === true) {
+        if (isReact.value === true && item.userReact) {
+          const index = item.userReact.indexOf(idAuth);
+          item.userReact.splice(index, 1);
           const updateValue = ref({
+            userReact: item.userReact,
             countHaha: --item.countHaha,
           });
           isReact.value = false;
-
           const data = await updateStatus(updateValue.value, item.id);
         } else {
+          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "haha" });
+
           const updateValue = ref({
+            userReact: item.userReact,
             countHaha: ++item.countHaha,
           });
           const data = await updateStatus(updateValue.value, item.id);
@@ -188,15 +267,21 @@ export default defineComponent({
     // HANDLE SAD BUTTON EMOTIONAL
     const onSad = async (item: any) => {
       try {
-        if (isReact.value === true) {
+        if (isReact.value === true && item.userReact) {
+          const index = item.userReact.indexOf(idAuth);
+          item.userReact.splice(index, 1);
           const updateValue = ref({
+            userReact: item.userReact,
             countSad: --item.countSad,
           });
           isReact.value = false;
 
           const data = await updateStatus(updateValue.value, item.id);
         } else {
+          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "sad" });
+
           const updateValue = ref({
+            userReact: item.userReact,
             countSad: ++item.countSad,
           });
           const data = await updateStatus(updateValue.value, item.id);
@@ -210,15 +295,24 @@ export default defineComponent({
     // HANDLE SURPRISE BUTTON EMOTIONAL
     const onSurprise = async (item: any) => {
       try {
-        if (isReact.value === true) {
+        if (isReact.value === true && item.userReact) {
+          const index = item.userReact.indexOf(idAuth);
+          item.userReact.splice(index, 1);
           const updateValue = ref({
+            userReact: item.userReact,
             countSurprise: --item.countSurprise,
           });
           isReact.value = false;
 
           const data = await updateStatus(updateValue.value, item.id);
         } else {
+          item.userReact.push({
+            idAuth: idAuth.value,
+            nameEmotional: "surprise",
+          });
+
           const updateValue = ref({
+            userReact: item.userReact,
             countSurprise: ++item.countSurprise,
           });
           const data = await updateStatus(updateValue.value, item.id);
@@ -232,14 +326,19 @@ export default defineComponent({
     // HANDLE ANGRY BUTTON EMOTIONAL
     const onAngry = async (item: any) => {
       try {
-        if (isReact.value === true) {
+        if (isReact.value === true && item.userReact) {
+          const index = item.userReact.indexOf(idAuth);
+          item.userReact.splice(index, 1);
           const updateValue = ref({
+            userReact: item.userReact,
             countAngry: --item.countAngry,
           });
           isReact.value = false;
           const data = await updateStatus(updateValue.value, item.id);
         } else {
+          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "angry" });
           const updateValue = ref({
+            userReact: item.userReact,
             countAngry: ++item.countAngry,
           });
           const data = await updateStatus(updateValue.value, item.id);
@@ -257,6 +356,7 @@ export default defineComponent({
       onLike,
       isReact,
       idAuth,
+      auth,
       onLove,
       onHaha,
       onSad,
@@ -272,8 +372,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../assets/css/variables.scss";
-@import "../assets/css/emotional-color.scss";
-
 .status {
   margin-top: 10px;
   background-color: $bg-color;
@@ -381,17 +479,45 @@ export default defineComponent({
       }
     }
   }
+  .status__emotional--display--child {
+    flex: 100%;
+    display: flex;
+    justify-content: space-around;
+
+    .status__emotional--child {
+      flex: 100%;
+      text-align: center;
+      padding: 20px 20px;
+      cursor: pointer;
+      transition: all 0.13s linear;
+      .emotional {
+        font-size: 1.5rem;
+        transition: all 0.1s linear;
+        padding-left: 2px;
+        color: rgb(51, 51, 51, 0.8);
+      }
+    }
+    .status__emotional--child:hover .emotional {
+      transform: scale(1.1);
+    }
+    .status__emotional--child:hover {
+      background-color: rgb(219, 217, 217);
+    }
+  }
   .status__emotional--child {
     flex: 100%;
-    padding: 15px 20px;
     text-align: center;
+    padding: 20px 20px;
     cursor: pointer;
     transition: all 0.13s linear;
     .emotional {
       font-size: 1.5rem;
       transition: all 0.1s linear;
-      color: blue;
       padding-left: 2px;
+      color: rgb(51, 51, 51, 0.8);
+    }
+    .status__emotional--liked {
+      color: blue;
     }
   }
   .status__emotional--child:hover .emotional {
@@ -401,4 +527,6 @@ export default defineComponent({
     background-color: rgb(219, 217, 217);
   }
 }
+
+@import "../assets/css/emotional-color.scss";
 </style>

@@ -197,7 +197,7 @@ export const addStatus = async (status: any, fileArr: any) => {
   statusStore().value.forEach((status: any) => {
     hashMap.set(status.fileName, status);
   });
-  //if found the same file name img in store when u add status. It will change your time upload img
+  //if found the same file name img in store when u add status. It will change your time upload img and reusable img
   if (fileArr.fileName !== "" && hashMap.get(fileArr.fileName)) {
     const updateValue = {
       uploadTime:
@@ -228,6 +228,7 @@ export const addStatus = async (status: any, fileArr: any) => {
 export const updateStatus = async (updateStatus: any, id: string) => {
   const db = getFirestore();
   const docRef = doc(db, "status", id);
+  const colRef = collection(db, "status");
   const data = await updateDoc(docRef, updateStatus);
 };
 export const deleteStatus = async (fileName: string, id: string) => {
