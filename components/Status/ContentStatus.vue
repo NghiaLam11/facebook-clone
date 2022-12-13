@@ -54,23 +54,12 @@
           @mouseleave="onDisplayEmotionalOut"
           class="status__emotional--hide"
         >
-          <div class="status__emotional--hide--child">
-            <i @click="onLike(item)" class="like fas fa-thumbs-up"></i>
-          </div>
-          <div class="status__emotional--hide--child">
-            <i @click="onLove(item)" class="love fas fa-heart"></i>
-          </div>
-          <div class="status__emotional--hide--child">
-            <i @click="onHaha(item)" class="haha fas fa-grin-squint"></i>
-          </div>
-          <div class="status__emotional--hide--child">
-            <i @click="onSad(item)" class="sad fas fa-sad-tear"></i>
-          </div>
-          <div class="status__emotional--hide--child">
-            <i @click="onSurprise(item)" class="surprise fas fa-surprise"></i>
-          </div>
-          <div class="status__emotional--hide--child">
-            <i @click="onAngry(item)" class="angry fas fa-angry"></i>
+          <div
+            v-for="emotional in emotionals"
+            :key="emotional.name"
+            class="status__emotional--hide--child"
+          >
+            <i @click="onReact(item, emotional)" :class="emotional.style"></i>
           </div>
         </div>
         <!-- Button Like -->
@@ -82,54 +71,37 @@
           v-show="idAuth === e?.idAuth && e?.nameEmotional !== 'like'"
         >
           <div
-            @click="onLove(item)"
             @mouseover="onDisplayEmotional(item)"
             class="status__emotional--child"
-            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'love'"
+            v-show="idAuth === e?.idAuth"
           >
-            <i class="love emotional fas fa-heart"></i>
-          </div>
-          <div
-            @click="onHaha(item)"
-            @mouseover="onDisplayEmotional(item)"
-            class="status__emotional--child"
-            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'haha'"
-          >
-            <i class="haha emotional fas fa-grin-squint"></i>
-          </div>
-          <div
-            @click="onSad(item)"
-            @mouseover="onDisplayEmotional(item)"
-            class="status__emotional--child"
-            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'sad'"
-          >
-            <i class="sad emotional fas fa-sad-tear"></i>
-          </div>
-          <div
-            @click="onSurprise(item)"
-            @mouseover="onDisplayEmotional(item)"
-            class="status__emotional--child"
-            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'surprise'"
-          >
-            <i class="surprise emotional fas fa-surprise"></i>
-          </div>
-          <div
-            @click="onAngry(item)"
-            @mouseover="onDisplayEmotional(item)"
-            class="status__emotional--child"
-            v-show="idAuth === e?.idAuth && e?.nameEmotional === 'angry'"
-          >
-            <i class="angry emotional fas fa-angry"></i>
+            <i
+              @click="
+                onReact(item, {
+                  name: e.nameEmotional,
+                  style: e.styleEmotional,
+                })
+              "
+              :class="e?.styleEmotional"
+            ></i>
           </div>
         </div>
         <div
+          v-show="isReact === false || item.userReact.length === 0"
           class="status__emotional--child"
           @mouseover="onDisplayEmotional(item)"
-          @click="onLike(item)"
+          @click="
+            onReact(item, {
+              style: 'like emotional fas fa-thumbs-up',
+              name: 'like',
+            })
+          "
         >
           <i
-            :class="{ 'status__emotional--liked': item.userReact.length !== 0 }"
-            class="like emotional fas fa-thumbs-up"
+            :class="[
+              { 'status__emotional--liked': item.userReact.length !== 0 },
+              'like emotional fas fa-thumbs-up',
+            ]"
           ></i>
         </div>
         <div class="status__emotional--child">
@@ -145,7 +117,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-// Fix emotional////////////////////////////////
+
 export default defineComponent({
   setup() {
     // CALL fROM THE COMPOSABLES/USEFIREBASE FOLDER
@@ -180,172 +152,266 @@ export default defineComponent({
     const onDisplayEmotionalOut = () => {
       idItem.value = "";
     };
-    // HANDLE LIKE BUTTON EMOTIONAL
-    const isReact = ref(false);
-    const onLike = async (item: any) => {
-      item.userReact.forEach((element: any) => {
-        element.idAuth === idAuth.value
-          ? (isReact.value = true)
-          : (isReact.value = false);
-      });
-      if (item.userReact && isReact.value === true) {
+    const emotionals = ref([
+      {
+        style: "like emotional fas fa-thumbs-up",
+        name: "like",
+      },
+      {
+        name: "love",
+        style: "love emotional fas fa-heart",
+      },
+      {
+        name: "haha",
+        style: "haha emotional fas fa-grin-squint",
+      },
+      {
+        name: "sad",
+        style: "sad emotional fas fa-sad-tear",
+      },
+      {
+        name: "surprise",
+        style: "surprise emotional fas fa-surprise",
+      },
+      {
+        name: "angry",
+        style: "angry emotional fas fa-angry",
+      },
+    ]);
+    const isReact = ref();
+    const emotionalName = ref("");
+    const onReact = async (item: any, react: any) => {
+      if (item.userReact.length > 0) {
+        console.log(item.userReact);
+        item.userReact.forEach((element: any) => {
+          if (element.idAuth === idAuth.value) {
+            emotionalName.value = element.nameEmotional;
+            console.log("11");
+          } else {
+            emotionalName.value = "";
+            console.log("22");
+          }
+        });
+        if (react.name === "like") {
+          isReact.value = false;
+        }
+      } else if (item.userReact.length === 0) {
+        emotionalName.value = "";
+        isReact.value = false;
+      }
+      // HANDLE CLICK EMOTIONAL BUTTON
+      if (item.userReact && emotionalName.value === "") {
+        console.log("empty");
+        item.userReact.push({
+          idAuth: idAuth.value,
+          nameEmotional: react.name,
+          styleEmotional: react.style,
+          isReact: true,
+        });
+        const updateValue = ref({});
+        if (react.name === "like") {
+          isReact.value = false;
+          updateValue.value = {
+            countLike: ++item.countLike,
+            userReact: item.userReact,
+            isReact: false,
+          };
+        } else if (react.name === "love") {
+          isReact.value = true;
+          updateValue.value = {
+            countLove: ++item.countLove,
+            userReact: item.userReact,
+            isReact: true,
+          };
+        } else if (react.name === "haha") {
+          isReact.value = true;
+
+          updateValue.value = {
+            countHaha: ++item.countHaha,
+            userReact: item.userReact,
+            isReact: true,
+          };
+        } else if (react.name === "sad") {
+          isReact.value = true;
+
+          updateValue.value = {
+            countSad: ++item.countSad,
+            userReact: item.userReact,
+            isReact: true,
+          };
+        } else if (react.name === "surprise") {
+          isReact.value = true;
+
+          updateValue.value = {
+            countSurprise: ++item.countSurprise,
+            userReact: item.userReact,
+            isReact: true,
+          };
+        } else {
+          isReact.value = true;
+
+          updateValue.value = {
+            countAngry: ++item.countAngry,
+            userReact: item.userReact,
+            isReact: true,
+          };
+        }
+        const data = await updateStatus(updateValue.value, item.id);
+        console.log(item.userReact);
+      } else if (item.userReact && emotionalName.value === react.name) {
+        console.log("name already");
         const index = item.userReact.indexOf(idAuth);
         item.userReact.splice(index, 1);
-        const updateValue = ref({
-          countLike: --item.countLike,
-          userReact: item.userReact,
-          isReact: item.isReact,
-        });
-        const data = await updateStatus(updateValue.value, item.id);
-        isReact.value = false;
-      } else {
-        item.userReact.push({ idAuth: idAuth.value, nameEmotional: "like" });
-        const updateValue = ref({
-          countLike: ++item.countLike,
-          userReact: item.userReact,
-          isReact: !isReact.value,
-        });
-        const data = await updateStatus(updateValue.value, item.id);
-        isReact.value = true;
-      }
-      idItem.value = "";
-    };
-    // HANDLE LOVE BUTTON EMOTIONAL
-    const onLove = async (item: any) => {
-      try {
-        if (isReact.value === true && item.userReact) {
-          const index = item.userReact.indexOf(idAuth);
-          item.userReact.splice(index, 1);
-          const updateValue = ref({
+        const updateValue = ref({});
+        if (react.name === "like") {
+          isReact.value = false;
+
+          updateValue.value = {
+            countLike: --item.countLike,
+            isReact: false,
             userReact: item.userReact,
+          };
+        } else if (react.name === "love") {
+          isReact.value = true;
+
+          updateValue.value = {
             countLove: --item.countLove,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
-          isReact.value = false;
-        } else {
-          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "love" });
-
-          const updateValue = ref({
             userReact: item.userReact,
-            countLove: ++item.countLove,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
+            isReact: true,
+          };
+        } else if (react.name === "haha") {
           isReact.value = true;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-      idItem.value = "";
-    };
-    // HANDLE HAHA BUTTON EMOTIONAL
-    const onHaha = async (item: any) => {
-      try {
-        if (isReact.value === true && item.userReact) {
-          const index = item.userReact.indexOf(idAuth);
-          item.userReact.splice(index, 1);
-          const updateValue = ref({
-            userReact: item.userReact,
+
+          updateValue.value = {
             countHaha: --item.countHaha,
-          });
-          isReact.value = false;
-          const data = await updateStatus(updateValue.value, item.id);
-        } else {
-          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "haha" });
-
-          const updateValue = ref({
             userReact: item.userReact,
-            countHaha: ++item.countHaha,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
+            isReact: true,
+          };
+        } else if (react.name === "sad") {
           isReact.value = true;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-      idItem.value = "";
-    };
-    // HANDLE SAD BUTTON EMOTIONAL
-    const onSad = async (item: any) => {
-      try {
-        if (isReact.value === true && item.userReact) {
-          const index = item.userReact.indexOf(idAuth);
-          item.userReact.splice(index, 1);
-          const updateValue = ref({
-            userReact: item.userReact,
+
+          updateValue.value = {
             countSad: --item.countSad,
-          });
-          isReact.value = false;
-
-          const data = await updateStatus(updateValue.value, item.id);
-        } else {
-          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "sad" });
-
-          const updateValue = ref({
             userReact: item.userReact,
-            countSad: ++item.countSad,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
+            isReact: true,
+          };
+        } else if (react.name === "surprise") {
           isReact.value = true;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-      idItem.value = "";
-    };
-    // HANDLE SURPRISE BUTTON EMOTIONAL
-    const onSurprise = async (item: any) => {
-      try {
-        if (isReact.value === true && item.userReact) {
-          const index = item.userReact.indexOf(idAuth);
-          item.userReact.splice(index, 1);
-          const updateValue = ref({
-            userReact: item.userReact,
+
+          updateValue.value = {
             countSurprise: --item.countSurprise,
-          });
-          isReact.value = false;
-
-          const data = await updateStatus(updateValue.value, item.id);
+            userReact: item.userReact,
+            isReact: true,
+          };
         } else {
-          item.userReact.push({
-            idAuth: idAuth.value,
-            nameEmotional: "surprise",
-          });
-
-          const updateValue = ref({
-            userReact: item.userReact,
-            countSurprise: ++item.countSurprise,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
           isReact.value = true;
-        }
-      } catch (error) {
-        console.log(error);
-      }
-      idItem.value = "";
-    };
-    // HANDLE ANGRY BUTTON EMOTIONAL
-    const onAngry = async (item: any) => {
-      try {
-        if (isReact.value === true && item.userReact) {
-          const index = item.userReact.indexOf(idAuth);
-          item.userReact.splice(index, 1);
-          const updateValue = ref({
-            userReact: item.userReact,
+
+          updateValue.value = {
             countAngry: --item.countAngry,
-          });
-          isReact.value = false;
-          const data = await updateStatus(updateValue.value, item.id);
-        } else {
-          item.userReact.push({ idAuth: idAuth.value, nameEmotional: "angry" });
-          const updateValue = ref({
             userReact: item.userReact,
-            countAngry: ++item.countAngry,
-          });
-          const data = await updateStatus(updateValue.value, item.id);
-          isReact.value = true;
+            isReact: true,
+          };
         }
-      } catch (error) {
-        console.log(error);
+        const data = await updateStatus(updateValue.value, item.id);
+        console.log(item.userReact);
+      } else if (item.userReact && emotionalName.value !== react.name) {
+        console.log("empty name");
+        const index = item.userReact.indexOf(idAuth);
+        item.userReact.splice(index, 1);
+        item.userReact.push({
+          idAuth: idAuth.value,
+          nameEmotional: react.name,
+          styleEmotional: react.style,
+          isReact: true,
+        });
+        //VARIABLE UPDATE FIREBASE STORE
+        const updateValue = ref({});
+        // THIS FUNC WILL MINUS THE OLD COUNT EMOTIONAL VALUE and PLUS the new count value
+        const updateEmotional = (emotional: any) => {
+          if (emotional === "like") {
+            updateValue.value = {
+              ...updateValue.value,
+              countLike: --item.countLike,
+            };
+          } else if (emotional === "love") {
+            updateValue.value = {
+              ...updateValue.value,
+              countLove: --item.countLove,
+            };
+          } else if (emotional === "sad") {
+            updateValue.value = {
+              ...updateValue.value,
+              countSad: --item.countSad,
+            };
+          } else if (emotional === "haha") {
+            updateValue.value = {
+              ...updateValue.value,
+              countHaha: --item.countHaha,
+            };
+          } else if (emotional === "surprise") {
+            updateValue.value = {
+              ...updateValue.value,
+              countSurprise: --item.countSurprise,
+            };
+          } else if (emotional === "angry") {
+            updateValue.value = {
+              ...updateValue.value,
+              countAngry: --item.countAngry,
+            };
+          }
+        };
+        if (react.name === "like") {
+          isReact.value = false;
+          updateValue.value = {
+            countLike: ++item.countLike,
+            userReact: item.userReact,
+            isReact: false,
+          };
+          updateEmotional(emotionalName.value);
+        } else if (react.name === "love") {
+          isReact.value = true;
+          updateValue.value = {
+            countLove: ++item.countLove,
+            userReact: item.userReact,
+            isReact: true,
+          };
+          updateEmotional(emotionalName.value);
+        } else if (react.name === "haha") {
+          isReact.value = true;
+          updateValue.value = {
+            countHaha: ++item.countHaha,
+            userReact: item.userReact,
+            isReact: true,
+          };
+          updateEmotional(emotionalName.value);
+        } else if (react.name === "sad") {
+          isReact.value = true;
+          updateValue.value = {
+            countSad: ++item.countSad,
+            userReact: item.userReact,
+            isReact: true,
+          };
+          updateEmotional(emotionalName.value);
+        } else if (react.name === "surprise") {
+          isReact.value = true;
+          updateValue.value = {
+            countSurprise: ++item.countSurprise,
+            userReact: item.userReact,
+            isReact: true,
+          };
+          updateEmotional(emotionalName.value);
+        } else {
+          isReact.value = true;
+          updateValue.value = {
+            countAngry: ++item.countAngry,
+            userReact: item.userReact,
+            isReact: true,
+          };
+          updateEmotional(emotionalName.value);
+        }
+        console.log(item.userReact);
+
+        const data = await updateStatus(updateValue.value, item.id);
       }
       idItem.value = "";
     };
@@ -353,18 +419,14 @@ export default defineComponent({
       status,
       onUserStatus,
       isUserStatus,
-      onLike,
       isReact,
       idAuth,
       auth,
-      onLove,
-      onHaha,
-      onSad,
-      onSurprise,
-      onAngry,
       onDisplayEmotional,
       onDisplayEmotionalOut,
       idItem,
+      emotionals,
+      onReact,
     };
   },
 });
@@ -372,6 +434,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "../assets/css/variables.scss";
+@import "../assets/css/emotional-color.scss";
 .status {
   margin-top: 10px;
   background-color: $bg-color;
@@ -437,8 +500,10 @@ export default defineComponent({
     position: absolute;
     flex: 100%;
     left: 1%;
-    top: -90%;
+    top: -75%;
     animation: emotional 1s ease-in-out;
+    display: flex;
+    justify-content: space-between;
     @keyframes emotional {
       from {
         opacity: 0;
@@ -496,6 +561,7 @@ export default defineComponent({
         padding-left: 2px;
         color: rgb(51, 51, 51, 0.8);
       }
+      @import "../assets/css/emotional-color.scss"; // file scss style emotional color
     }
     .status__emotional--child:hover .emotional {
       transform: scale(1.1);
@@ -527,6 +593,7 @@ export default defineComponent({
     background-color: rgb(219, 217, 217);
   }
 }
-
-@import "../assets/css/emotional-color.scss";
+.angry {
+  color: red;
+}
 </style>
