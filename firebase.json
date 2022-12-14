@@ -1,0 +1,11 @@
+{
+  "functions": { "source": ".output/server" ,"runtime": "nodejs16" },
+  "hosting": [
+    {
+      "site": "facebook-clone-11056",
+      "public": ".output/public",
+      "cleanUrls": true,
+      "rewrites": [{ "source": "**", "function": "nuxtserver" }]
+    }
+  ]
+}

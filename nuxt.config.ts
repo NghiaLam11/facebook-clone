@@ -12,4 +12,7 @@ export default defineNuxtConfig({
    alias: {
     'class-validator': 'class-validator/cjs/index.js',
   },
+  nitro: {
+    preset: 'firebase'
+  }
 });

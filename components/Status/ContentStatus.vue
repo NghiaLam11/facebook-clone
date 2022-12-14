@@ -117,7 +117,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-
+// Fixe click thi user khac bi an mat nut click
 export default defineComponent({
   setup() {
     // CALL fROM THE COMPOSABLES/USEFIREBASE FOLDER
