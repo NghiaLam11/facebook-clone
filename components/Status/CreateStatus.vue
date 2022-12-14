@@ -102,7 +102,12 @@ export default defineComponent({
         isPublic: isPublic.value,
         fileName: fileName.value,
         auth: prop.authContent,
-        userReact: [],
+        userReact: [{
+          nameEmotional: 'all',
+          idAuth : 'all',
+          styleEmotional: 'like emotional fas fa-thumbs-up',
+          isReact: false
+        }],
       });
       const fileArr = ref({
         fileName,
