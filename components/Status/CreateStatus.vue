@@ -103,10 +103,10 @@ export default defineComponent({
         fileName: fileName.value,
         auth: prop.authContent,
         userReact: [{
-          nameEmotional: 'all',
-          idAuth : 'all',
-          styleEmotional: 'like emotional fas fa-thumbs-up',
-          isReact: false
+          idAuth: prop.authContent?.id,
+          nameEmotional: 'like',
+          isReact: false,
+          styleEmotional: 'emotional fas fa-thumbs-up'
         }],
       });
       const fileArr = ref({

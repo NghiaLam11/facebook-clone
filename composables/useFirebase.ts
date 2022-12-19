@@ -170,8 +170,8 @@ export const deleteStory = async (fileName: string, id: string) => {
   return data;
 };
 export const fetchStatus = async () => {
-  var isLoad = load();
-  isLoad.value = true;
+  // var isLoad = load();
+  // isLoad.value = true;
   const db = getFirestore();
   const statusArr = statusStore();
   const colRef = collection(db, "status");
@@ -186,7 +186,7 @@ export const fetchStatus = async () => {
     statusArr.value = status.sort(function (a: any, b: any) {
       return Number(new Date(b.uploadTime)) - Number(new Date(a.uploadTime));
     });
-    isLoad.value = false;
+    // isLoad.value = false;
   });
 };
 export const addStatus = async (status: any, fileArr: any) => {
@@ -231,6 +231,36 @@ export const updateStatus = async (updateStatus: any, id: string) => {
   const colRef = collection(db, "status");
   const data = await updateDoc(docRef, updateStatus);
 };
+
+
+// export const fetchUser = async () => {
+//   var isLoad = load();
+//   isLoad.value = true;
+//   const db = getFirestore();
+//   const statusArr = statusStore();
+//   const colRef = collection(db, "status");
+//   getDocs(colRef).then((res) => {
+//     const status: any = [];
+//     res.docs.forEach((story: any) => {
+//       status.push({
+//         ...story.data(),
+//         id: story.id,
+//       });
+//     });
+//     statusArr.value = status.sort(function (a: any, b: any) {
+//       return Number(new Date(b.uploadTime)) - Number(new Date(a.uploadTime));
+//     });
+//     isLoad.value = false;
+//   });
+// };
+
+export const updateUser = async (updateUser: any, id: string) => {
+  const db = getFirestore();
+  const docRef = doc(db, "user", id);
+  const colRef = collection(db, "user");
+  const data = await updateDoc(docRef, updateUser);
+};
+
 export const deleteStatus = async (fileName: string, id: string) => {
   const db = getFirestore();
   const storage = getStorage();
