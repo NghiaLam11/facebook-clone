@@ -10,4 +10,3 @@ export const idUser = () => useState<string>("id-user", () => "");
 export const stories = () => useState<Story[]>("stories", () => []);
 export const idStory = () => useState<string>("id-story", () => "");
 export const statusStore = () => useState<any>("status", () => []);
-

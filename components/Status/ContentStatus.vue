@@ -62,7 +62,7 @@
             <i @click="onReact(item, emotional)" :class="emotional.style"></i>
           </div>
         </div>
-        <!-- Button Like -->
+        <!-- DISPLAY VALUE IN THE DATABASE RETURN -->
         <div class="status__emotional--display">
           <div
             v-for="e in item.userReact"
@@ -79,6 +79,7 @@
           >
             <i :class="e?.styleEmotional"></i>
           </div>
+          <!-- Button Like -->
           <div
             @mouseover="onDisplayEmotional(item)"
             @click="
@@ -92,29 +93,16 @@
             <i class="emotional fas fa-thumbs-up"></i>
           </div>
         </div>
-
-        <!-- <div
-          v-for="e in item.userReact"
-          :key="e.idAuth"
-          v-show="idAuth === e?.idAuth && e.isReact === false"
-          class="status__emotional--child"
-          @mouseover="onDisplayEmotional(item)"
-          @click="
-            onReact(item, {
-              style: 'like emotional fas fa-thumbs-up',
-              name: 'like',
-            })
-          "
-        >
-          <i class="emotional fas fa-thumbs-up"></i>
-        </div> -->
-        <div class="status__emotional--child">
+        <div @click="onDisplayComments(item)" class="status__emotional--child">
           <i class="emotional fas fa-comment-dots"></i>
         </div>
         <div class="status__emotional--child">
           <i class="emotional fas fa-share"></i>
         </div>
       </div>
+    </div>
+    <div v-if="isDisplayComments" class="status__comments">
+      <StatusCreateComments @hideComments="onDisplayComments" :status="statusComment"/>
     </div>
   </div>
 </template>
@@ -150,9 +138,11 @@ export default defineComponent({
     const onDisplayEmotional = (item: any) => {
       idItem.value = item.id;
     };
+    // HIDDEN EMOTIONAL WHEN YOU GO OUT LIKE BUTTON
     const onDisplayEmotionalOut = () => {
       idItem.value = "";
     };
+    // EMOTIONALS
     const emotionals = ref([
       {
         style: "like emotional fas fa-thumbs-up",
@@ -179,28 +169,11 @@ export default defineComponent({
         style: "angry emotional fas fa-angry",
       },
     ]);
-
-    // const statuses = computed(() => {
-    //   var map = new Map();
-    //   statusStore().value.forEach((status: any) => {
-    //     status.userReact.forEach((a: any) => {
-    //       map.set({...a, id: status.id}, a.idAuth);
-    //       console.log(a);
-    //     });
-    //   });
-    //   return map
-    // });
-
-    // const b = () => {
-    //   console.log(statuses.value);
-    // };
-
-    const isReact = ref();
+    // THIS VARIABLE IS (assign)
     const emotionalArr = ref();
     const onReact = async (item: any, react: any) => {
       fetchStatus();
       if (item.userReact.length > 0) {
-        console.log(item.userReact);
         var hashMap = new Map();
         item.userReact.forEach((element: any) => {
           hashMap.set(element.idAuth, element);
@@ -209,19 +182,23 @@ export default defineComponent({
           hashMap.get(idAuth.value) !== undefined &&
           hashMap.get(idAuth.value).isReact === true
         ) {
+          // (assign)
           emotionalArr.value = hashMap.get(idAuth.value);
           console.log("11");
         } else if (
           hashMap.get(idAuth.value) !== undefined &&
           hashMap.get(idAuth.value).isReact === false
         ) {
+          //(assign)
           console.log("11f");
           emotionalArr.value = hashMap.get(idAuth.value);
         } else if (hashMap.get(idAuth.value) === undefined) {
+          //(assign)
           emotionalArr.value = "";
           console.log("22");
         }
       } else if (item.userReact.length === 0) {
+        //(assign)
         emotionalArr.value = "";
       }
       // HANDLE CLICK EMOTIONAL BUTTON
@@ -284,17 +261,6 @@ export default defineComponent({
             nameEmotional: react.name,
             styleEmotional: react.style,
             isReact: false,
-          });
-        } else if (
-          emotionalArr.value.isReact === true &&
-          emotionalArr.value.nameEmotional !== react.name
-        ) {
-          console.log("kkk");
-          item.userReact.push({
-            idAuth: idAuth.value,
-            nameEmotional: react.name,
-            styleEmotional: react.style,
-            isReact: true,
           });
         } else if (emotionalArr.value.isReact === false) {
           item.userReact.push({
@@ -384,22 +350,10 @@ export default defineComponent({
         console.log(index);
         item.userReact.splice(index, 1);
         //COMPLETED DELETE THE VALUE
-
+        //
         //IF USER'S REACT IN STORE EQUAL TRUE AND NAME OF EMOTION EQUAL THE OLD VALUE
         // AND THEN PUSH THE NEW VALUE WITH THE isReact = true AFTER DELETED THE OLD ABOVE (1) VALUE
         if (
-          emotionalArr.value.isReact === true &&
-          emotionalArr.value.nameEmotional === react.name
-        ) {
-          item.userReact.push({
-            idAuth: idAuth.value,
-            nameEmotional: react.name,
-            styleEmotional: react.style,
-            isReact: false,
-          });
-          //IF USER'S REACT IN STORE EQUAL TRUE AND NAME OF EMOTION NOT EQUAL THE OLD VALUE
-          // AND THEN PUSH THE NEW VALUE WITH THE isReact = true AFTER DELETED THE OLD ABOVE (1) VALUE
-        } else if (
           emotionalArr.value.isReact === true &&
           emotionalArr.value.nameEmotional !== react.name
         ) {
@@ -407,7 +361,7 @@ export default defineComponent({
             idAuth: idAuth.value,
             nameEmotional: react.name,
             styleEmotional: react.style,
-            isReact: true,
+            isReact: false,
           });
           //IF USER'S REACT IN STORE EQUAL TRUE THEN PUSH THE NEW VALUE WITH THE isReact = true AFTER DELETED THE OLD ABOVE (1) VALUE
         } else if (emotionalArr.value.isReact === false) {
@@ -498,11 +452,21 @@ export default defineComponent({
       }
       idItem.value = "";
     };
+    //COMMENTS
+    const statusComment = ref()
+    const isDisplayComments = ref(false)
+    const onDisplayComments = (status: any) => {
+      isDisplayComments.value = !isDisplayComments.value;
+      if(status){
+         statusComment.value = status
+      } else {
+        return ''
+      }
+    }
     return {
       status,
       onUserStatus,
       isUserStatus,
-      isReact,
       idAuth,
       auth,
       onDisplayEmotional,
@@ -510,8 +474,9 @@ export default defineComponent({
       idItem,
       emotionals,
       onReact,
-      // b,
-      // statuses
+      onDisplayComments,
+      isDisplayComments,
+      statusComment,
     };
   },
 });
@@ -523,206 +488,206 @@ export default defineComponent({
   margin-top: 10px;
   background-color: $bg-color;
   border-radius: 2px;
-}
-.status__auth {
-  align-items: center;
-  padding: 5px;
-  display: flex;
   position: relative;
-  .status--avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 5px;
-  }
-  .status__more {
-    position: absolute;
-    right: 1%;
-    top: 10%;
-    padding: 3px;
-    opacity: 0.6;
-    cursor: pointer;
-  }
-  .status__more:hover {
-    opacity: 1;
-  }
-}
-.text {
-  padding: 5px;
-  color: #333;
-}
-.img {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgb(226, 225, 225);
-  padding: 20px;
-  .status__img {
-    height: 500px;
-  }
-}
-.status__emotional {
-  border-top: 1px solid #000;
-  display: flex;
-  justify-content: space-around;
-  position: relative;
-  .status__emotional--total {
-    position: absolute;
-    left: 2px;
-    top: 2px;
-    font-size: 0.8rem;
-    .emotional__count {
-      padding-right: 5px;
-    }
-    i {
-      margin-left: -4px;
-    }
-  }
-  .status__emotional--hide {
+  .status__auth {
+    align-items: center;
+    padding: 5px;
     display: flex;
-    position: absolute;
-    flex: 100%;
-    left: 1%;
-    top: -75%;
-    animation: emotional 1s ease-in-out;
-    display: flex;
-    justify-content: space-between;
-    @keyframes emotional {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-    .status__emotional--hide--child {
-      i {
-        transition: all 0.1s linear;
-        font-size: 2rem;
-        margin: 3px;
-        cursor: pointer;
-        background-color: #000;
-        border-radius: 50%;
-        padding: 5px;
-        overflow: hidden;
-        animation: shadowEmotional 5s ease-in-out infinite;
-      }
-      @keyframes shadowEmotional {
-        0% {
-          box-shadow: 0 0 10px rgb(229, 255, 0);
-        }
-        30% {
-          box-shadow: 0 0 7px #2e00fc;
-        }
-        70% {
-          box-shadow: 0 0 5px rgb(255, 240, 23);
-        }
-        100% {
-          box-shadow: 0 0 3px rgba(236, 18, 18, 0.5);
-        }
-      }
-      i:hover {
-        transform: scale(1.3);
-        opacity: 1;
-      }
-    }
-  }
-  .status__emotional--child {
-    flex: 100%;
-    text-align: center;
-    padding: 20px 20px;
-    cursor: pointer;
-    transition: all 0.13s linear;
-
-    .emotional {
-      font-size: 1.5rem;
-      transition: all 0.1s linear;
-      padding-left: 2px;
-      color: rgb(51, 51, 51, 0.8);
-    }
-    @import "../assets/css/emotional-color.scss"; // file scss style emotional color
-  }
-
-  .status__emotional--display {
-    flex: 100%;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.13s linear;
     position: relative;
+    .status--avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .status__more {
+      position: absolute;
+      right: 1%;
+      top: 10%;
+      padding: 3px;
+      opacity: 0.6;
+      cursor: pointer;
+    }
+    .status__more:hover {
+      opacity: 1;
+    }
+  }
+  .text {
+    padding: 5px;
+    color: #333;
+  }
+  .img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(226, 225, 225);
+    padding: 20px;
+    .status__img {
+      height: 500px;
+    }
+  }
+  .status__emotional {
+    border-top: 1px solid #000;
+    display: flex;
+    justify-content: space-around;
+    position: relative;
+    .status__emotional--total {
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      font-size: 0.8rem;
+      .emotional__count {
+        padding-right: 5px;
+      }
+      i {
+        margin-left: -4px;
+      }
+    }
+    .status__emotional--hide {
+      display: flex;
+      position: absolute;
+      flex: 100%;
+      left: 1%;
+      top: -75%;
+      animation: emotional 1s ease-in-out;
+      display: flex;
+      justify-content: space-between;
+      @keyframes emotional {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .status__emotional--hide--child {
+        i {
+          transition: all 0.1s linear;
+          font-size: 2rem;
+          margin: 3px;
+          cursor: pointer;
+          background-color: #000;
+          border-radius: 50%;
+          padding: 5px;
+          overflow: hidden;
+          animation: shadowEmotional 5s ease-in-out infinite;
+        }
+        @keyframes shadowEmotional {
+          0% {
+            box-shadow: 0 0 10px rgb(229, 255, 0);
+          }
+          30% {
+            box-shadow: 0 0 7px #2e00fc;
+          }
+          70% {
+            box-shadow: 0 0 5px rgb(255, 240, 23);
+          }
+          100% {
+            box-shadow: 0 0 3px rgba(236, 18, 18, 0.5);
+          }
+        }
+        i:hover {
+          transform: scale(1.3);
+          opacity: 1;
+        }
+      }
+    }
     .status__emotional--child {
+      flex: 100%;
       text-align: center;
       padding: 20px 20px;
       cursor: pointer;
       transition: all 0.13s linear;
-      position: absolute;
-      left: calc(50% - 26px);
 
       .emotional {
         font-size: 1.5rem;
         transition: all 0.1s linear;
         padding-left: 2px;
-        color: rgb(51, 51, 51, 0.5);
+        color: rgb(51, 51, 51, 0.8);
       }
-
-      @import "../assets/css/emotional-color.scss";
-      // file scss style emotional color
+      @import "../assets/css/emotional-color.scss"; // file scss style emotional color
     }
-    .haha, .sad, .love, .surprise, .angry {
-      background: transparent;
+
+    .status__emotional--display {
+      flex: 100%;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.13s linear;
+      position: relative;
+      .status__emotional--child {
+        text-align: center;
+        padding: 20px 20px;
+        cursor: pointer;
+        transition: all 0.13s linear;
+        position: absolute;
+        left: calc(50% - 26px);
+        .emotional {
+          font-size: 1.5rem;
+          transition: all 0.1s linear;
+          padding-left: 2px;
+          color: rgb(51, 51, 51, 0.5);
+        }
+
+        @import "../assets/css/emotional-color.scss";
+        // file scss style emotional color
+      }
+      .haha,
+      .sad,
+      .love,
+      .surprise,
+      .angry {
+        background: transparent;
+        scale: 1.2;
+      }
+      .status__emotional--child:hover {
+        background-color: transparent;
+      }
+    }
+    .status__emotional--display:hover {
+      background-color: rgb(219, 217, 217);
+      .status__emotional--child {
+        .haha {
+          z-index: 2;
+          background-color: rgb(219, 217, 217);
+          transform: scale(1.04);
+          color: yellow;
+        }
+        .love {
+          color: red;
+          z-index: 2;
+          background-color: rgb(219, 217, 217);
+          transform: scale(1.04);
+        }
+
+        .sad {
+          z-index: 2;
+          background-color: rgb(219, 217, 217);
+          color: rgb(255, 255, 78);
+          transform: scale(1.01);
+        }
+        .surprise {
+          z-index: 2;
+          color: rgb(248, 212, 9);
+          background-color: rgb(219, 217, 217);
+          transform: scale(1.01);
+        }
+        .angry {
+          z-index: 2;
+          background-color: rgb(219, 217, 217);
+          transform: scale(1.01);
+          color: red;
+        }
+      }
+    }
+    .status__emotional--child:hover .emotional {
+      transform: scale(1.1);
     }
     .status__emotional--child:hover {
-      background-color: transparent;
-    } // file scss style emotional color
-  }
-  .status__emotional--display:hover {
-    background-color: rgb(219, 217, 217);
-    .status__emotional--child {
-      .haha {
-        z-index: 2;
-        background-color: rgb(219, 217, 217);
-        transform: scale(1.04);
-        color: yellow;
-      }
-      .love {
-        color: red;
-        z-index: 2;
-        background-color: rgb(219, 217, 217);
-
-        transform: scale(1.04);
-      }
-
-      .sad {
-        z-index: 2;
-        background-color: rgb(219, 217, 217);
-
-        color: rgb(255, 255, 78);
-
-        transform: scale(1.01);
-      }
-      .surprise {
-        z-index: 2;
-        color: rgb(248, 212, 9);
-
-        background-color: rgb(219, 217, 217);
-
-        transform: scale(1.01);
-      }
-      .angry {
-        z-index: 2;
-
-        background-color: rgb(219, 217, 217);
-
-        transform: scale(1.01);
-
-        color: red;
-      }
+      background-color: rgb(219, 217, 217);
     }
   }
-  .status__emotional--child:hover .emotional {
-    transform: scale(1.1);
-  }
-  .status__emotional--child:hover {
-    background-color: rgb(219, 217, 217);
-  }
+}
+.status__comments {
+  z-index: 9999;
 }
 </style>
