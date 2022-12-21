@@ -146,7 +146,7 @@ export const addStory = async (story: any, fileArr: any) => {
   const imagesRef = storageReference(storage, fileArr.fileName);
   const storageRef: any = storageReference(
     storage,
-    `public/${fileArr.fileName}`
+    `stories/${fileArr.fileName}`
   );
   const addImg = await uploadBytes(storageRef, fileArr.file);
   const getImg = await getDownloadURL(storageRef);
@@ -163,7 +163,7 @@ export const deleteStory = async (fileName: string, id: string) => {
   const db = getFirestore();
   const storage = getStorage();
   const docRef = doc(db, "stories", id);
-  const desertRef = storageReference(storage, `public/${fileName}`);
+  const desertRef = storageReference(storage, `stories/${fileName}`);
   const store = await deleteObject(desertRef);
   const data = await deleteDoc(docRef);
   fetchStories();
@@ -232,28 +232,6 @@ export const updateStatus = async (updateStatus: any, id: string) => {
   const data = await updateDoc(docRef, updateStatus);
 };
 
-
-// export const fetchUser = async () => {
-//   var isLoad = load();
-//   isLoad.value = true;
-//   const db = getFirestore();
-//   const statusArr = statusStore();
-//   const colRef = collection(db, "status");
-//   getDocs(colRef).then((res) => {
-//     const status: any = [];
-//     res.docs.forEach((story: any) => {
-//       status.push({
-//         ...story.data(),
-//         id: story.id,
-//       });
-//     });
-//     statusArr.value = status.sort(function (a: any, b: any) {
-//       return Number(new Date(b.uploadTime)) - Number(new Date(a.uploadTime));
-//     });
-//     isLoad.value = false;
-//   });
-// };
-
 export const updateUser = async (updateUser: any, id: string) => {
   const db = getFirestore();
   const docRef = doc(db, "user", id);
@@ -275,7 +253,7 @@ export const saveFile = async () => {
   const storage = getStorage();
   const imagesRef = storageReference(
     storage,
-    "Untitled video - Made with Clipchamp.mp4"
+    "users/profile-user.png"
   );
   return getDownloadURL(imagesRef);
 };

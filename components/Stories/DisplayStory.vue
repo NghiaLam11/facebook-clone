@@ -164,6 +164,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "../assets/css/fixed.scss";
 @import "../assets/css/emotional-color.scss";
+.haha,
+.sad,
+.love,
+.surprise,
+.angry {
+  background-color: transparent;
+}
 .story__watch {
   @include Fixed;
   z-index: 999;
@@ -193,13 +200,13 @@ export default defineComponent({
         position: absolute;
         font-size: 1.2rem;
         top: 2%;
-        left: 2%;
+        right: 2%;
         z-index: 9999;
         color: red;
         cursor: pointer;
       }
       .story__remove:hover {
-        font-size: 1.25rem;
+        font-size: 1.3rem;
       }
       .story__img {
         position: absolute;

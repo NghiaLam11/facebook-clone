@@ -21,7 +21,11 @@
             ><i v-else class="fas fa-globe-americas"></i>{{ item.uploadTime }}
           </div>
         </div>
-        <i class="status__more fas fa-ellipsis-h"></i>
+        <i
+          v-if="idAuth === item.auth.id"
+          class="status__trash fas fa-trash"
+          @click="onDeleteStatus(item)"
+        ></i>
       </div>
       <div class="text">{{ item.content }}</div>
       <div v-if="item.attach !== ''" class="img">
@@ -38,7 +42,7 @@
             item.countAngry +
             item.countSurprise
           }}</span>
-          <i v-show="item.countLike > 0" class="like fas fa-thumbs-up"></i>
+          <i class="like fas fa-thumbs-up"></i>
           <i v-show="item.countLove > 0" class="love fas fa-heart"></i>
           <i v-show="item.countHaha > 0" class="haha fas fa-grin-squint"></i>
           <i v-show="item.countSad > 0" class="sad fas fa-sad-tear"></i>
@@ -47,6 +51,7 @@
             class="surprise fas fa-surprise"
           ></i>
           <i v-show="item.countAngry > 0" class="angry fas fa-angry"></i>
+          <span> and {{ item.comments.length }} comments</span>
         </div>
         <!-- Emotional display focus -->
         <div
@@ -102,7 +107,10 @@
       </div>
     </div>
     <div v-if="isDisplayComments" class="status__comments">
-      <StatusCreateComments @hideComments="onDisplayComments" :status="statusComment"/>
+      <StatusCreateComments
+        @hideComments="onDisplayComments"
+        :status="statusComment"
+      />
     </div>
   </div>
 </template>
@@ -453,16 +461,21 @@ export default defineComponent({
       idItem.value = "";
     };
     //COMMENTS
-    const statusComment = ref()
-    const isDisplayComments = ref(false)
+    const statusComment = ref();
+    const isDisplayComments = ref(false);
     const onDisplayComments = (status: any) => {
       isDisplayComments.value = !isDisplayComments.value;
-      if(status){
-         statusComment.value = status
+      if (status) {
+        fetchStatus();
+        statusComment.value = status;
       } else {
-        return ''
+        return "";
       }
-    }
+    };
+    const onDeleteStatus = async (item : any) => {
+      const data = await deleteStatus(item.fileName, item.id);
+      fetchStatus();
+    };
     return {
       status,
       onUserStatus,
@@ -477,6 +490,7 @@ export default defineComponent({
       onDisplayComments,
       isDisplayComments,
       statusComment,
+      onDeleteStatus,
     };
   },
 });
@@ -500,7 +514,7 @@ export default defineComponent({
       border-radius: 50%;
       margin-right: 5px;
     }
-    .status__more {
+    .status__trash {
       position: absolute;
       right: 1%;
       top: 10%;
@@ -527,7 +541,7 @@ export default defineComponent({
     }
   }
   .status__emotional {
-    border-top: 1px solid #000;
+    border-top: 1px solid rgb(156, 154, 154);
     display: flex;
     justify-content: space-around;
     position: relative;
@@ -540,7 +554,8 @@ export default defineComponent({
         padding-right: 5px;
       }
       i {
-        margin-left: -4px;
+        margin-left: -3px;
+        background-color: transparent;
       }
     }
     .status__emotional--hide {
